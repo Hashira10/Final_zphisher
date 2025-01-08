@@ -1,0 +1,42 @@
+<!-- templates/zphisher.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Run Zphisher</title>
+    <script>
+        function runZphisher() {
+            console.log("Request started");  // Для отладки
+            fetch('/run-zphisher/', {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}'
+                }
+            })
+            .then(response => {
+                console.log("Response received");  // Для отладки
+                return response.json();
+            })
+            .then(data => {
+                console.log("Data received", data);  // Для отладки
+                if (data.output) {
+                    document.getElementById('output').innerText = data.output;
+                } else if (data.error) {
+                    document.getElementById('output').innerText = "Error: " + data.error;
+                }
+            })
+            .catch(error => {
+                console.log("Error in fetch", error);  // Для отладки
+                document.getElementById('output').innerText = "Request failed: " + error;
+            });
+        }
+    </script>
+    
+</head>
+<body>
+    <h1>Run Zphisher Command</h1>
+    <button onclick="runZphisher()">Run Zphisher</button>
+    <pre id="output"></pre>
+</body>
+</html>
