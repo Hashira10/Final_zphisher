@@ -1,4 +1,3 @@
-<!-- templates/zphisher.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -7,36 +6,36 @@
     <title>Run Zphisher</title>
     <script>
         function runZphisher() {
-            console.log("Request started");  // Для отладки
-            fetch('/run-zphisher/', {
-                method: 'POST',
-                headers: {
-                    'X-CSRFToken': '{{ csrf_token }}'
+            console.log("Request started");
+            const outputElement = document.getElementById('output');
+            const urlElement = document.getElementById('urls');
+            outputElement.innerText = "Запуск zphisher...";
+
+            const eventSource = new EventSource('/run-zphisher/');
+            
+            eventSource.onmessage = function(event) {
+                console.log("Data received", event.data);
+                outputElement.innerText += event.data + "\n";
+                
+                // Проверим, если это ссылка, отобразим её отдельно
+                if (event.data.includes("URL")) {
+                    urlElement.innerText += event.data + "\n";
                 }
-            })
-            .then(response => {
-                console.log("Response received");  // Для отладки
-                return response.json();
-            })
-            .then(data => {
-                console.log("Data received", data);  // Для отладки
-                if (data.output) {
-                    document.getElementById('output').innerText = data.output;
-                } else if (data.error) {
-                    document.getElementById('output').innerText = "Error: " + data.error;
-                }
-            })
-            .catch(error => {
-                console.log("Error in fetch", error);  // Для отладки
-                document.getElementById('output').innerText = "Request failed: " + error;
-            });
+            };
+
+            eventSource.onerror = function(error) {
+                console.log("Error", error);
+                outputElement.innerText = "Произошла ошибка";
+                eventSource.close();
+            };
         }
     </script>
-    
 </head>
 <body>
     <h1>Run Zphisher Command</h1>
     <button onclick="runZphisher()">Run Zphisher</button>
     <pre id="output"></pre>
+    <h2>Generated Links:</h2>
+    <pre id="urls"></pre>
 </body>
 </html>
